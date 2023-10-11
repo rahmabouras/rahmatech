@@ -1,0 +1,46 @@
+version: '3'
+services:
+  # MySQL Database Service
+  db:
+    image: mysql:5.7
+    container_name: mysql_microservice
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: microservice_db
+      MYSQL_USER: microservice_user
+      MYSQL_PASSWORD: microservice_password
+    ports:
+      - "3306:3306"
+    networks:
+      - microservice_network
+
+  # Spring Boot Backend Service
+  backend:
+    image: your-spring-boot-image:latest
+    container_name: spring_boot_microservice
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/microservice_db
+      SPRING_DATASOURCE_USERNAME: microservice_user
+      SPRING_DATASOURCE_PASSWORD: microservice_password
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    networks:
+      - microservice_network
+
+  # React Frontend Service
+  frontend:
+    build:
+      context: ./frontend
+    container_name: react_frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - microservice_network
+
+networks:
+  microservice_network:
+    driver: bridge
